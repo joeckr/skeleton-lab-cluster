@@ -52,7 +52,7 @@ hooks = [
     {
         id = "helm-lint",
         name = "helm-lint",
-        entry = "helm lint chart/",
+        entry = "bash -c 'find charts -name \"Chart.yaml\" -exec dirname {} + | xargs helm lint'",
         language = "system",
         files = "^.*(Chart\\.yaml|values\\.yaml|templates/.*\\.yaml)$",
         pass_filenames = false
