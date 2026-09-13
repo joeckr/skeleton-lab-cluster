@@ -36,15 +36,9 @@ prek run --all-files
 """
 
 [tasks.helm-lint]
-description = "Lint Helm chart"
+description = "Lint all Helm charts in charts directory"
 run = """
-helm lint chart/
-"""
-
-[tasks.helm-template]
-description = "Render Helm chart templates"
-run = """
-helm template lab-service chart/
+find charts -name "Chart.yaml" -exec dirname {} + | xargs helm lint
 """
 
 [tasks.trivy-fs]
