@@ -18,14 +18,15 @@ A starter skeleton repository tailored as a source of truth, documentation, and 
   - Spin up and test services locally without requiring a cluster.
   - Pre-configured with port forwarding and healthchecks.
 - **Environment & Tooling (`mise` & `prek`)**:
-  - `mise.toml`: Tool version management (`helm`, `gitleaks`, `addlicense`, `trivy`, `actionlint`) and convenient task aliases.
-  - `prek.toml`: Fast git hooks enforcing Conventional Commits, branch protection, secrets scanning, recursive Helm linting across all charts, workflow linting (`actionlint`), and security audits (`zizmor`).
+  - `mise.toml`: Tool version management (`helm`, `gitleaks`, `addlicense`, `trivy`, `actionlint`, `shellcheck`, `zizmor`) and convenient task aliases.
+  - `prek.toml`: Fast git hooks enforcing Conventional Commits, branch protection, secrets scanning, recursive Helm linting across all charts, workflow linting (`actionlint`), security audits (`zizmor`), and shell script linting (`shellcheck`).
 - **GitHub Actions CI (`.github/workflows/`)**:
   - Reusable workflows powered by [`joeckr/ci-templates`](https://github.com/joeckr/ci-templates):
     - `actionlint`: Lints GitHub Actions workflow syntax.
     - `zizmor`: Security audit of GitHub Actions workflows.
     - `commitlint`: Enforces Conventional Commits specification.
     - `gitleaks`: Scans commits and PRs for secret leaks.
+    - `shellcheck`: Lints shell scripts.
     - `helm`: Recursively discovers, packages, and publishes Helm charts under `charts/` to GitHub Container Registry (GHCR) as OCI artifacts (with PR dry-run preview).
     - `semantic`: Automated Semantic Versioning, git tagging, and release notes (with PR dry-run preview).
 
@@ -42,6 +43,7 @@ A starter skeleton repository tailored as a source of truth, documentation, and 
 │       ├── gitleaks.yml         # Scans for credential leaks
 │       ├── helm.yml             # Packages and pushes Helm charts to GHCR
 │       ├── semantic.yml         # SemVer tagging and GitHub releases
+│       ├── shellcheck.yml       # Lints shell scripts
 │       ├── test_helm.yml        # PR dry-run test for Helm packaging
 │       ├── test_semantic.yml    # PR dry-run test for Semantic Versioning
 │       └── zizmor.yml           # Security audit for workflows
