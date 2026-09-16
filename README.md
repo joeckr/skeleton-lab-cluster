@@ -17,9 +17,9 @@ A starter skeleton repository tailored as a source of truth, documentation, and 
 - **Docker Compose (`docker-compose.yml`)**:
   - Spin up and test services locally without requiring a cluster.
   - Pre-configured with port forwarding and healthchecks.
-- **Environment & Tooling (`mise` & `prek`)**:
-  - `mise.toml`: Tool version management (`helm`, `gitleaks`, `addlicense`, `trivy`, `actionlint`, `shellcheck`, `zizmor`) and convenient task aliases.
-  - `prek.toml`: Fast git hooks enforcing Conventional Commits, branch protection, secrets scanning, recursive Helm linting across all charts, workflow linting (`actionlint`), security audits (`zizmor`), and shell script linting (`shellcheck`).
+- **Environment & Tooling (`mise` & `hk`)**:
+  - `mise.toml`: Tool version management (`hk`, `helm`, `gitleaks`, `addlicense`, `trivy`, `actionlint`, `shellcheck`, `zizmor`) and convenient task aliases.
+  - `hk.pkl`: Fast git hooks enforcing Conventional Commits, branch protection, secrets scanning, recursive Helm linting across all charts, workflow linting (`actionlint`), security audits (`zizmor`), and shell script linting (`shellcheck`).
 - **GitHub Actions CI (`.github/workflows/`)**:
   - Reusable workflows powered by [`joeckr/ci-templates`](https://github.com/joeckr/ci-templates):
     - `actionlint`: Lints GitHub Actions workflow syntax.
@@ -61,7 +61,7 @@ A starter skeleton repository tailored as a source of truth, documentation, and 
 │   └── template.sh              # Starter script placeholder
 ├── docker-compose.yml           # Local lab service definition
 ├── mise.toml                    # Mise tools and tasks
-├── prek.toml                    # Prek git hooks
+├── hk.pkl                       # hk git hooks
 └── README.md
 ```
 
@@ -71,7 +71,7 @@ A starter skeleton repository tailored as a source of truth, documentation, and 
 
 ### 1. Bootstrap Local Environment
 
-Ensure [`mise`](https://mise.jdx.dev/) and [`prek`](https://github.com/j178/prek) are installed:
+Ensure [`mise`](https://mise.jdx.dev/) and [`hk`](https://github.com/jdx/hk) are installed:
 
 ```bash
 # Verify environment and install git hooks

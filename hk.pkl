@@ -1,0 +1,65 @@
+amends "package://github.com/jdx/hk/releases/download/v2.0.1/hk@2.0.1#/Config.pkl"
+import "package://github.com/jdx/hk/releases/download/v2.0.1/hk@2.0.1#/Builtins.pkl"
+
+local linters = new Mapping {
+    ["no-commit-to-branch"] = (Builtins.no_commit_to_branch) {
+        check = "hk util no-commit-to-branch --branch main --branch master"
+    }
+    ["trailing-whitespace"] = Builtins.trailing_whitespace
+    ["end-of-file-fixer"] = Builtins.newlines
+    ["check-yaml"] = (Builtins.yamllint) {
+        exclude = List("**/templates/**", "charts/**", "Helm/**")
+    }
+    ["check-toml"] = Builtins.taplo
+    ["check-json"] = Builtins.jq
+    ["check-xml"] = Builtins.xmllint
+    ["forbid-submodules"] = Builtins.forbid_submodules
+    ["check-merge-conflict"] = Builtins.check_merge_conflict
+    ["check-added-large-files"] = Builtins.check_added_large_files
+    ["commitlint"] = Builtins.check_conventional_commit
+    ["gitleaks-system"] = (Builtins.gitleaks) {
+        check = "gitleaks protect --redact --verbose --no-banner"
+    }
+    ["actionlint"] = Builtins.actionlint
+    ["zizmor"] = Builtins.zizmor
+    ["shellcheck"] = Builtins.shellcheck
+}
+
+local local_hooks = new Mapping {
+    ["addlicense"] {
+        glob = List("**/*.py", "**/*.go", "**/*.js", "**/*.rs")
+        check = "mise exec -- addlicense -c \"Joseph Christopher King\" -l mit -v {{files}}"
+    }
+    ["helm-lint"] {
+        glob = List("**/Chart.yaml", "**/values.yaml", "**/templates/*.yaml")
+        check = "bash -c 'find charts -name \"Chart.yaml\" -exec dirname {} + | xargs helm lint'"
+    }
+}
+
+// Combine all steps EXCEPT commitlint into `steps`
+steps {
+    ["no-commit-to-branch"] = linters["no-commit-to-branch"]
+    ["trailing-whitespace"] = linters["trailing-whitespace"]
+    ["end-of-file-fixer"] = linters["end-of-file-fixer"]
+    ["check-yaml"] = linters["check-yaml"]
+    ["check-toml"] = linters["check-toml"]
+    ["check-json"] = linters["check-json"]
+    ["check-xml"] = linters["check-xml"]
+    ["forbid-submodules"] = linters["forbid-submodules"]
+    ["check-merge-conflict"] = linters["check-merge-conflict"]
+    ["check-added-large-files"] = linters["check-added-large-files"]
+    ["gitleaks-system"] = linters["gitleaks-system"]
+    ["actionlint"] = linters["actionlint"]
+    ["zizmor"] = linters["zizmor"]
+    ["shellcheck"] = linters["shellcheck"]
+    ["addlicense"] = local_hooks["addlicense"]
+    ["helm-lint"] = local_hooks["helm-lint"]
+}
+
+hooks {
+    ["commit-msg"] {
+        steps {
+            ["commitlint"] = linters["commitlint"]
+        }
+    }
+}
