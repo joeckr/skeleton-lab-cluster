@@ -119,3 +119,13 @@ Commits must follow the [Conventional Commits](https://www.conventionalcommits.o
 - `chore:`, `docs:`, `ci:`, `test:`, `refactor:` -> Maintenance changes (no release bump).
 
 Upon merging to `main`, the `semantic.yml` workflow automatically computes the next version, creates a Git tag, and publishes a GitHub Release. The `helm.yml` workflow recursively discovers all charts under `charts/`, packages each chart, and pushes them to GHCR.
+
+## Support
+
+If you find this project useful, consider supporting my work on [Ko-fi](https://ko-fi.com/joeckr):
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/joeckr)
+
+## License
+
+Please refer to the `LICENSE` file for details.
