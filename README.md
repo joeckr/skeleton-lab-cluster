@@ -17,18 +17,15 @@ A starter skeleton repository tailored as a source of truth, documentation, and 
 - **Docker Compose (`docker-compose.yml`)**:
   - Spin up and test services locally without requiring a cluster.
   - Pre-configured with port forwarding and healthchecks.
-- **Environment & Tooling (`mise` & `prek`)**:
-  - `mise.toml`: Tool version management (`helm`, `gitleaks`, `addlicense`, `trivy`, `actionlint`, `shellcheck`, `zizmor`) and convenient task aliases.
-  - `prek.toml`: Fast git hooks enforcing Conventional Commits, branch protection, secrets scanning, recursive Helm linting across all charts, workflow linting (`actionlint`), security audits (`zizmor`), and shell script linting (`shellcheck`).
+- **Environment & Tooling (`mise` & `hk`)**:
+  - `mise.toml`: Tool version management (`helm`, `betterleaks`, `addlicense`, `trivy`, `actionlint`, `hadolint`, `shellcheck`, `zizmor`, `hk`, `pkl`, `tombi`, `yamllint`) and convenient task aliases.
+  - `hk.pkl`: Fast git hooks powered by [`hk`](https://hk.jdx.dev/) enforcing Conventional Commits, branch protection, secrets scanning (`betterleaks`), Helm linting across charts, workflow linting (`actionlint`), security audits (`zizmor`), shell script linting (`shellcheck`), YAML linting (`yamllint`), TOML formatting (`tombi`), and license headers (`addlicense`).
 - **GitHub Actions CI (`.github/workflows/`)**:
   - Reusable workflows powered by [`joeckr/ci-templates`](https://github.com/joeckr/ci-templates):
-    - `actionlint`: Lints GitHub Actions workflow syntax.
-    - `zizmor`: Security audit of GitHub Actions workflows.
-    - `commitlint`: Enforces Conventional Commits specification.
-    - `gitleaks`: Scans commits and PRs for secret leaks.
-    - `shellcheck`: Lints shell scripts.
-    - `helm`: Recursively discovers, packages, and publishes Helm charts under `charts/` to GitHub Container Registry (GHCR) as OCI artifacts (with PR dry-run preview).
-    - `semantic`: Automated Semantic Versioning, git tagging, and release notes (with PR dry-run preview).
+    - `lint.yml`: Workflow linting (`actionlint`), Conventional Commits validation (`commitlint`), and shell script linting (`shellcheck`).
+    - `security.yml`: Secrets scanning (`betterleaks`) and workflow security audit (`zizmor`).
+    - `release.yml`: Runs on push to `main` to compute SemVer tags, generate GitHub releases, and package & publish Helm charts under `charts/` to GHCR as OCI artifacts.
+    - `test_release.yml`: PR dry-run validation for both Helm packaging and Semantic Versioning.
 
 ---
 
@@ -38,15 +35,10 @@ A starter skeleton repository tailored as a source of truth, documentation, and 
 .
 ├── .github/
 │   └── workflows/
-│       ├── actionlint.yml       # Lints workflow files
-│       ├── commitlint.yml       # Validates conventional commit messages
-│       ├── gitleaks.yml         # Scans for credential leaks
-│       ├── helm.yml             # Packages and pushes Helm charts to GHCR
-│       ├── semantic.yml         # SemVer tagging and GitHub releases
-│       ├── shellcheck.yml       # Lints shell scripts
-│       ├── test_helm.yml        # PR dry-run test for Helm packaging
-│       ├── test_semantic.yml    # PR dry-run test for Semantic Versioning
-│       └── zizmor.yml           # Security audit for workflows
+│       ├── lint.yml             # actionlint, commitlint, shellcheck
+│       ├── release.yml          # SemVer tagging, GitHub releases, and Helm publishing to GHCR
+│       ├── security.yml         # betterleaks secrets scanning and zizmor audit
+│       └── test_release.yml     # PR dry-run tests for Helm and Semantic releases
 ├── charts/
 │   └── lab-cluster/             # Starter Helm chart (add additional charts/wrappers here)
 │       ├── Chart.yaml           # Helm chart definition
@@ -61,7 +53,7 @@ A starter skeleton repository tailored as a source of truth, documentation, and 
 │   └── template.sh              # Starter script placeholder
 ├── docker-compose.yml           # Local lab service definition
 ├── mise.toml                    # Mise tools and tasks
-├── prek.toml                    # Prek git hooks
+├── hk.pkl                       # hk git hooks configuration
 └── README.md
 ```
 
@@ -71,11 +63,14 @@ A starter skeleton repository tailored as a source of truth, documentation, and 
 
 ### 1. Bootstrap Local Environment
 
-Ensure [`mise`](https://mise.jdx.dev/) and [`prek`](https://github.com/j178/prek) are installed:
+Ensure [`mise`](https://mise.jdx.dev/) and [`hk`](https://hk.jdx.dev/) are installed:
 
 ```bash
 # Verify environment and install git hooks
 mise run install
+
+# Run checks across all files
+mise run check
 ```
 
 ### 2. Local Experimentation (Docker Compose)
@@ -118,4 +113,14 @@ Commits must follow the [Conventional Commits](https://www.conventionalcommits.o
 - `feat!: breaking change` -> Triggers a **major** release.
 - `chore:`, `docs:`, `ci:`, `test:`, `refactor:` -> Maintenance changes (no release bump).
 
-Upon merging to `main`, the `semantic.yml` workflow automatically computes the next version, creates a Git tag, and publishes a GitHub Release. The `helm.yml` workflow recursively discovers all charts under `charts/`, packages each chart, and pushes them to GHCR.
+Upon merging to `main`, the `release.yml` workflow automatically computes the next version, creates a Git tag, publishes a GitHub Release, and recursively discovers, packages, and pushes all charts under `charts/` to GHCR as OCI artifacts.
+
+## Support
+
+If you find this project useful, consider supporting my work on [Ko-fi](https://ko-fi.com/joeckr):
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/joeckr)
+
+## License
+
+Please refer to the `LICENSE` file for details.
