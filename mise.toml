@@ -18,38 +18,6 @@ run = """
 hk install --mise
 """
 
-[tasks.compose]
-description = "Run Podman Compose for local lab"
-run = """
-podman compose up -d
-"""
-
-[tasks.play]
-description = "Run Podman Play for local helm chart testing"
-depends = ["helm-template"]
-run = """
-podman play kube rendered.yaml
-"""
-
-[tasks.down]
-description = "Stop Podman Compose"
-run = """
-podman compose down
-"""
-
-[tasks.downplay]
-description = "Run Podman Play for local helm chart testing"
-depends = ["helm-dep"]
-run = """
-podman play kube rendered.yaml --down
-"""
-
-[tasks.logs]
-description = "View Podman Compose logs"
-run = """
-podman compose logs -f
-"""
-
 [tasks.hk]
 description = "Run hk checks on all files"
 alias = "check"
@@ -62,13 +30,6 @@ description = "Lint all Helm charts in charts directory"
 depends = ["helm-dep"]
 run = """
 find charts -name "Chart.yaml" -exec dirname {} + | xargs helm lint
-"""
-
-[tasks.helm-template]
-description = "Render Helm chart templates"
-depends = ["helm-dep"]
-run = """
-helm template test charts/lab-cluster/ > rendered.yaml
 """
 
 [tasks.helm-dep]
