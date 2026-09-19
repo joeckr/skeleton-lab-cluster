@@ -32,13 +32,6 @@ run = """
 find charts -name "Chart.yaml" -exec dirname {} + | xargs helm lint
 """
 
-[tasks.helm-template]
-description = "Render Helm chart templates"
-depends = ["helm-dep"]
-run = """
-helm template test charts/lab-cluster/ > rendered.yaml
-"""
-
 [tasks.helm-dep]
 description = "Build Helm chart dependencies"
 run = """
