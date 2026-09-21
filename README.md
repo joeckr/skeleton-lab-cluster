@@ -11,12 +11,9 @@ A starter skeleton repository tailored as a source of truth, documentation, and 
 - **Helm Charts (`charts/`)**:
   - Multi-chart repository layout supporting multiple charts across Kubernetes flavors and components.
   - Automated recursive chart discovery, linting, packaging, and publishing in CI.
-  - Starter chart (`charts/lab-cluster`) with support for Kubernetes and OpenShift (Ingress vs. Routes).
-  - Secure defaults: non-root execution (`runAsNonRoot: true`), `RuntimeDefault` seccomp profile, and dropping `ALL` capabilities.
+  - Starter chart (`charts/lab-cluster`) with support for Kubernetes and OpenShift (standard Ingress vs. OpenShift Routes).
+  - Secure defaults: non-root execution (`runAsNonRoot: true`), `RuntimeDefault` seccomp profile, and dropping `ALL` capabilities (Pod Security Standards / OpenShift SCC compliant).
   - Master and control-plane node tolerations for compact lab clusters.
-- **Docker Compose (`docker-compose.yml`)**:
-  - Spin up and test services locally without requiring a cluster.
-  - Pre-configured with port forwarding and healthchecks.
 - **Environment & Tooling (`mise` & `hk`)**:
   - `mise.toml`: Tool version management (`helm`, `betterleaks`, `addlicense`, `trivy`, `actionlint`, `hadolint`, `shellcheck`, `zizmor`, `hk`, `pkl`, `tombi`, `yamllint`) and convenient task aliases.
   - `hk.pkl`: Fast git hooks powered by [`hk`](https://hk.jdx.dev/) enforcing Conventional Commits, branch protection, secrets scanning (`betterleaks`), Helm linting across charts, workflow linting (`actionlint`), security audits (`zizmor`), shell script linting (`shellcheck`), YAML linting (`yamllint`), TOML formatting (`tombi`), and license headers (`addlicense`).
@@ -34,6 +31,7 @@ A starter skeleton repository tailored as a source of truth, documentation, and 
 ```text
 .
 ├── .github/
+│   ├── FUNDING.yml              # Ko-fi sponsorship configuration
 │   └── workflows/
 │       ├── lint.yml             # actionlint, commitlint, shellcheck
 │       ├── release.yml          # SemVer tagging, GitHub releases, and Helm publishing to GHCR
@@ -51,7 +49,6 @@ A starter skeleton repository tailored as a source of truth, documentation, and 
 │           └── route.yaml       # OpenShift Route
 ├── scripts/
 │   └── template.sh              # Starter script placeholder
-├── docker-compose.yml           # Local lab service definition
 ├── mise.toml                    # Mise tools and tasks
 ├── hk.pkl                       # hk git hooks configuration
 └── README.md
@@ -73,35 +70,99 @@ mise run install
 mise run check
 ```
 
-### 2. Local Experimentation (Docker Compose)
+### 2. Helm Chart Development & Validation
 
-Start the local lab service:
+#### Dependency Management & Linting
 
 ```bash
-# Start container in detached mode
-mise run compose
+# Build Helm chart dependencies across all charts
+mise run helm-dep
 
-# Check status and logs
-docker compose ps
-mise run logs
-
-# Stop container
-mise run down
-```
-
-### 3. Kubernetes / Helm Experimentation
-
-#### Lint and Template Locally
-```bash
-# Recursively lint all charts under charts/
+# Recursively lint all charts under charts/ (runs helm-dep first)
 mise run helm-lint
 
 # Or via command line directly
 find charts -name "Chart.yaml" -exec dirname {} + | xargs helm lint
-
-# Test OpenShift Route rendering
-helm template lab-cluster charts/lab-cluster/ --set ingress.enabled=true --set ingress.route=true
 ```
+
+#### Template Rendering & Validation
+
+Verify rendered manifests for Kubernetes or OpenShift environments:
+
+```bash
+# Render default templates (ClusterIP Service + Deployment)
+helm template lab-cluster charts/lab-cluster/
+
+# Render standard Kubernetes Ingress
+helm template lab-cluster charts/lab-cluster/ \
+  --set ingress.enabled=true
+
+# Render OpenShift Route
+helm template lab-cluster charts/lab-cluster/ \
+  --set ingress.enabled=true \
+  --set ingress.route="true"
+```
+
+#### Security & Vulnerability Scanning
+
+Scan repository files and manifests for vulnerabilities and misconfigurations using Trivy:
+
+```bash
+# Run Trivy filesystem scan
+mise run trivy-fs
+```
+
+### 3. Cluster Deployment & Testing
+
+Deploy and test charts on your Kubernetes cluster (e.g. Talos Linux, vanilla Kubernetes, k3s, OpenShift):
+
+```bash
+# Install or upgrade chart in the current cluster context
+helm upgrade --install lab-cluster charts/lab-cluster/
+
+# Deploy with custom values or ingress enabled
+helm upgrade --install lab-cluster charts/lab-cluster/ \
+  --set ingress.enabled=true \
+  --set ingress.host="lab.example.com"
+
+# Check deployment status
+kubectl get pods,svc,ingress -l app=lab-service
+
+# For OpenShift clusters, inspect routes
+oc get routes -l app=lab-service
+
+# Teardown / uninstall release
+helm uninstall lab-cluster
+```
+
+---
+
+## Mise Tasks Reference
+
+Run tasks with `mise run <task>`:
+
+| Task | Description | Command |
+|---|---|---|
+| `install` | Install tools and set up git hooks | `hk install --mise` |
+| `check` (or `hk`) | Run all linters and hook checks across repository | `hk check --all` |
+| `helm-dep` | Build Helm chart dependencies across all charts | `find charts -name "Chart.yaml" -exec dirname {} + \| xargs -n1 helm dependency build` |
+| `helm-lint` | Recursively lint all Helm charts under `charts/` | `find charts -name "Chart.yaml" -exec dirname {} + \| xargs helm lint` |
+| `trivy-fs` | Scan repository filesystem for security vulnerabilities | `trivy fs .` |
+
+---
+
+## Security & Compliance
+
+The charts in this repository are configured with secure production-ready defaults:
+
+- **Pod Security Standards (PSS)**: Compatible with `restricted` and `baseline` admission policies:
+  - `runAsNonRoot: true` enforces non-root container execution.
+  - `seccompProfile.type: RuntimeDefault` restricts system calls.
+  - `capabilities.drop: ["ALL"]` drops all Linux capabilities.
+  - `allowPrivilegeEscalation: false` prevents elevation of privileges.
+  - `automountServiceAccountToken: false` prevents unintended credential leakage to workloads.
+- **OpenShift Security Context Constraints (SCC)**: Compatible with `restricted-v2` / `restricted` SCCs without requiring elevated service accounts.
+- **Compact Lab Clusters**: Includes pre-configured tolerations for `node-role.kubernetes.io/control-plane` and `node-role.kubernetes.io/master`, allowing deployments on single-node or compact lab clusters where workloads share control-plane nodes.
 
 ---
 
