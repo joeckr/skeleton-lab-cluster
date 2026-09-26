@@ -15,7 +15,7 @@ A starter skeleton repository tailored as a source of truth, documentation, and 
   - Secure defaults: non-root execution (`runAsNonRoot: true`), `RuntimeDefault` seccomp profile, and dropping `ALL` capabilities (Pod Security Standards / OpenShift SCC compliant).
   - Master and control-plane node tolerations for compact lab clusters.
 - **Environment & Tooling (`mise` & `hk`)**:
-  - `mise.toml`: Tool version management (`helm`, `betterleaks`, `addlicense`, `trivy`, `actionlint`, `hadolint`, `shellcheck`, `zizmor`, `hk`, `pkl`, `tombi`, `yamllint`) and convenient task aliases.
+  - `mise.toml`: Tool version management (`helm`, `betterleaks`, `addlicense`, `trivy`, `actionlint`, `shellcheck`, `zizmor`, `hk`, `pkl`, `tombi`, `yamllint`) and convenient task aliases.
   - `hk.pkl`: Fast git hooks powered by [`hk`](https://hk.jdx.dev/) enforcing Conventional Commits, branch protection, secrets scanning (`betterleaks`), Helm linting across charts, workflow linting (`actionlint`), security audits (`zizmor`), shell script linting (`shellcheck`), YAML linting (`yamllint`), TOML formatting (`tombi`), and license headers (`addlicense`).
 - **GitHub Actions CI (`.github/workflows/`)**:
   - Reusable workflows powered by [`joeckr/ci-templates`](https://github.com/joeckr/ci-templates):
@@ -76,10 +76,10 @@ mise run check
 
 ```bash
 # Build Helm chart dependencies across all charts
-mise run helm-dep
+mise run helm-d
 
-# Recursively lint all charts under charts/ (runs helm-dep first)
-mise run helm-lint
+# Recursively lint all charts under charts/ (runs helm-d first)
+mise run helm-l
 
 # Or via command line directly
 find charts -name "Chart.yaml" -exec dirname {} + | xargs helm lint
@@ -144,9 +144,9 @@ Run tasks with `mise run <task>`:
 | Task | Description | Command |
 |---|---|---|
 | `install` | Install tools and set up git hooks | `hk install --mise` |
-| `check` (or `hk`) | Run all linters and hook checks across repository | `hk check --all` |
-| `helm-dep` | Build Helm chart dependencies across all charts | `find charts -name "Chart.yaml" -exec dirname {} + \| xargs -n1 helm dependency build` |
-| `helm-lint` | Recursively lint all Helm charts under `charts/` | `find charts -name "Chart.yaml" -exec dirname {} + \| xargs helm lint` |
+| `hk` (or `check`) | Run all linters and hook checks across repository | `hk check --all` |
+| `helm-d` | Build Helm chart dependencies across all charts | `find charts -name "Chart.yaml" -exec dirname {} + \| xargs -n1 helm dependency build` |
+| `helm-l` | Recursively lint all Helm charts under `charts/` | `find charts -name "Chart.yaml" -exec dirname {} + \| xargs helm lint` |
 | `trivy-fs` | Scan repository filesystem for security vulnerabilities | `trivy fs .` |
 
 ---
