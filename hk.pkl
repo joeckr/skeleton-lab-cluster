@@ -12,7 +12,6 @@ steps {
   ["check-xml"] = Builtins.xmllint
   ["actionlint"] = Builtins.actionlint
   ["zizmor"] = Builtins.zizmor
-  ["hadolint"] = Builtins.hadolint
   ["shellcheck"] = Builtins.shellcheck
   ["betterleaks"] = Builtins.betterleaks
   ["pkl"] = Builtins.pkl
