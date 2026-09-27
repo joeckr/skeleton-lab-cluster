@@ -1,6 +1,6 @@
 # skeleton-lab-cluster
 
-A starter skeleton repository tailored as a source of truth, documentation, and multiple Helm charts across different flavors of Kubernetes (vanilla Kubernetes, Talos, OpenShift, etc.) in a lab environment.
+A starter skeleton repository tailored as a source of truth, documentation, and multiple Helm charts for rootless, hardened container images in a Kubernetes lab environment.
 
 > **Note**: This repository intentionally **does NOT include a Dockerfile**. If a custom image build is required, use an OCI image repository (such as `skeleton-oci-modified`). Lab cluster repositories focus on cluster configuration, deployment definitions, documentation, and Helm charts.
 
@@ -9,10 +9,10 @@ A starter skeleton repository tailored as a source of truth, documentation, and 
 ## Features
 
 - **Helm Charts (`charts/`)**:
-  - Multi-chart repository layout supporting multiple charts across Kubernetes flavors and components.
+  - Multi-chart repository layout supporting multiple charts across components.
   - Automated recursive chart discovery, linting, packaging, and publishing in CI.
-  - Starter chart (`charts/lab-cluster`) with support for Kubernetes and OpenShift (standard Ingress vs. OpenShift Routes).
-  - Secure defaults: non-root execution (`runAsNonRoot: true`), `RuntimeDefault` seccomp profile, and dropping `ALL` capabilities (Pod Security Standards / OpenShift SCC compliant).
+  - Starter chart (`charts/lab-cluster`) with standard Kubernetes Ingress support.
+  - Secure defaults: non-root execution (`runAsNonRoot: true`), `RuntimeDefault` seccomp profile, and dropping `ALL` capabilities (Kubernetes restricted Pod Security Standards compliant).
   - Master and control-plane node tolerations for compact lab clusters.
 - **Environment & Tooling (`mise` & `hk`)**:
   - `mise.toml`: Tool version management (`helm`, `betterleaks`, `addlicense`, `trivy`, `actionlint`, `shellcheck`, `zizmor`, `hk`, `pkl`, `tombi`, `yamllint`) and convenient task aliases.
@@ -45,8 +45,7 @@ A starter skeleton repository tailored as a source of truth, documentation, and 
 │       └── templates/
 │           ├── deployment.yaml  # Workload deployment
 │           ├── service.yaml     # Kubernetes Service
-│           ├── ingress.yaml     # Kubernetes Ingress
-│           └── route.yaml       # OpenShift Route
+│           └── ingress.yaml     # Kubernetes Ingress
 ├── scripts/
 │   └── template.sh              # Starter script placeholder
 ├── mise.toml                    # Mise tools and tasks
@@ -87,7 +86,7 @@ find charts -name "Chart.yaml" -exec dirname {} + | xargs helm lint
 
 #### Template Rendering & Validation
 
-Verify rendered manifests for Kubernetes or OpenShift environments:
+Verify rendered manifests:
 
 ```bash
 # Render default templates (ClusterIP Service + Deployment)
@@ -96,11 +95,6 @@ helm template lab-cluster charts/lab-cluster/
 # Render standard Kubernetes Ingress
 helm template lab-cluster charts/lab-cluster/ \
   --set ingress.enabled=true
-
-# Render OpenShift Route
-helm template lab-cluster charts/lab-cluster/ \
-  --set ingress.enabled=true \
-  --set ingress.route="true"
 ```
 
 #### Security & Vulnerability Scanning
@@ -114,7 +108,7 @@ mise run trivy-fs
 
 ### 3. Cluster Deployment & Testing
 
-Deploy and test charts on your Kubernetes cluster (e.g. Talos Linux, vanilla Kubernetes, k3s, OpenShift):
+Deploy and test charts on your Kubernetes cluster:
 
 ```bash
 # Install or upgrade chart in the current cluster context
@@ -127,9 +121,6 @@ helm upgrade --install lab-cluster charts/lab-cluster/ \
 
 # Check deployment status
 kubectl get pods,svc,ingress -l app=lab-service
-
-# For OpenShift clusters, inspect routes
-oc get routes -l app=lab-service
 
 # Teardown / uninstall release
 helm uninstall lab-cluster
@@ -161,7 +152,6 @@ The charts in this repository are configured with secure production-ready defaul
   - `capabilities.drop: ["ALL"]` drops all Linux capabilities.
   - `allowPrivilegeEscalation: false` prevents elevation of privileges.
   - `automountServiceAccountToken: false` prevents unintended credential leakage to workloads.
-- **OpenShift Security Context Constraints (SCC)**: Compatible with `restricted-v2` / `restricted` SCCs without requiring elevated service accounts.
 - **Compact Lab Clusters**: Includes pre-configured tolerations for `node-role.kubernetes.io/control-plane` and `node-role.kubernetes.io/master`, allowing deployments on single-node or compact lab clusters where workloads share control-plane nodes.
 
 ---
